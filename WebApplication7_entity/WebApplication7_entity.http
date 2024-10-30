@@ -1,0 +1,6 @@
+@WebApplication7_entity_HostAddress = http://localhost:5147
+
+GET {{WebApplication7_entity_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
