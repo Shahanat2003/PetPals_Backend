@@ -15,6 +15,7 @@ namespace WebApplication7_petPals.Mapping
             CreateMap<User,UserRegisterDto>().ReverseMap();
             CreateMap<User, OutputUserDto>().ReverseMap();
             CreateMap<Category,CreateCatogoryDto>().ReverseMap();
+            CreateMap<Category, OutCatogryDto>().ReverseMap();
             CreateMap<Product,CreatePrdctDto>().ReverseMap();
             CreateMap<Wishlists,WishlistDto>().ReverseMap();
 

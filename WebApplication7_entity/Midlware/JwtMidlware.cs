@@ -14,8 +14,9 @@
                 {
                     context.Request.Headers.Append("Authorization", $"Bearer {cookie}");
                 }
-                await _next(context);
+              
             }
+            await _next(context);
 
         }
     }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Identity.Client;
 using WebApplication7_petPals.Models;
 using WebApplication7_petPals.Models.Dto.UserDto;
@@ -35,7 +36,7 @@ namespace WebApplication7_petPals.Services.Register
                 user.Password = hashPassword;
                 _appDbContext.Users.Add(user);
                 await _appDbContext.SaveChangesAsync();
-                return "item added succesfuly";
+                return "user registered succesfuly";
 
             }
             catch (Exception ex) { 

@@ -73,7 +73,7 @@ namespace WebApplication7_petPals.Services.Products
                 }
                 else
                 {
-                    ProductImage = "/Images/Products/placeholder.jpg";
+                    ProductImage = "/Images/Products/ph.jpg";
 
                 }
 
@@ -162,12 +162,12 @@ namespace WebApplication7_petPals.Services.Products
 
 
         }
-        public async Task<List<OutPrdctDto>> GetProductByName(string name)
+        public async Task<List<OutPrdctDto>> GetProductByName(string Catogry_name)
         {
             try
             {
                 var prodct = await _context.products
-                    .Where(p => p.Category.Name == name)
+                    .Where(p => p.Category.Name == Catogry_name)
                     .Select(p => new OutPrdctDto
                 {
                     Id = p.Id,
@@ -207,5 +207,66 @@ namespace WebApplication7_petPals.Services.Products
             }
 
         }
-    }
-}
+        public async Task<List<OutPrdctDto>> Searchproduct(string search)
+        {
+            try
+            {
+                var searchedProduct = await _context.products.Include(c => c.Category).Where(c=> c.Name.ToLower().Contains( search.ToLower())).ToListAsync();
+                if (searchedProduct != null)
+                {
+                    return searchedProduct.Select(p => new OutPrdctDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        NewPrice = p.NewPrice,
+                        OldPrice = p.OldPrice,
+                        Description = p.Description,
+                        Category = p.Category.Name,
+                        Type = p.Type
+                    }).ToList();
+
+
+                }
+                return new List<OutPrdctDto>();
+
+            }
+            catch (Exception ex) { 
+            throw new Exception("error when searchinf the product"+ex.Message);
+
+            }
+           
+        }
+        public async Task<List<OutPrdctDto>> Pagination(int page, int pageSize)
+        {
+            try
+            {
+                var product = await _context.products.Include(c => c.Category).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+                if (product != null)
+                {
+
+                    return product.Select(p => new OutPrdctDto
+                    {
+                        Id=p.Id,
+                        Name = p.Name,
+                        OldPrice = p.OldPrice,
+                        Description = p.Description,
+                        Category = p.Category.Name,
+                        NewPrice = p.NewPrice
+
+                    }).ToList();
+                }
+                return [];
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("error occured when paginating the product"+ex.Message);
+
+            }
+               
+              
+            }
+        }
+
+
+        }
+

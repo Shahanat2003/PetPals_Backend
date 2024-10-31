@@ -19,15 +19,15 @@ namespace WebApplication7_petPals.Services.Cart
             _configuration = configuration;
             _hostURL = _configuration["HostUrl:url"];
         }
-        public async Task<bool> AddToCart(int product_id, string token)
+        public async Task<bool> AddToCart(int product_id, int userId)
         {
             try
             {
-                var user_id = _jwtIdInterface.GetUserFromToken(token);
-                if (user_id == 0) throw new Exception("user no valid");
+                //var user_id = _jwtIdInterface.GetUserFromToken(token);
+                if (userId == 0) throw new Exception("user no valid");
                 var user = await _context.Users.Include(u => u.Cart)
                     .ThenInclude(c => c.CartItems)
-                    .FirstOrDefaultAsync(u => u.UserId == user_id);
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
                 if (user == null) throw new Exception("not found the user");
                 var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
                 if (product == null) throw new Exception($"product is not found with id of {product_id}");
@@ -37,13 +37,14 @@ namespace WebApplication7_petPals.Services.Cart
                     {
                         user.Cart = new Models.Cart()
                         {
-                            User_id = user_id,
+                            User_id = userId,
                             CartItems = new List<CartItem>()
                         };
                         _context.carts.Add(user.Cart);
                         await _context.SaveChangesAsync();
 
                     }
+                   
                 }
                 CartItem existingProduct = user.Cart.CartItems.FirstOrDefault(c => c.Product_id == product_id);
                 if (existingProduct != null)
@@ -71,19 +72,19 @@ namespace WebApplication7_petPals.Services.Cart
             }
 
         }
-        public async Task<List<OutCartDto>> GetCartItem(string token)
+        public async Task<List<OutCartDto>> GetCartItem(int userId)
         {
             try
             {
-                int user_id = _jwtIdInterface.GetUserFromToken(token);
-                if (user_id == 0) throw new Exception("the user is invalid");
-                var user = await _context.carts.Include(p => p.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(po => po.User_id == user_id);
+                //int user_id = _jwtIdInterface.GetUserFromToken(token);
+                if (userId == 0) throw new Exception("the user is invalid");
+                var user = await _context.carts.Include(p => p.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(po => po.User_id == userId);
                 if (user == null) throw new Exception("no user found");
                 if (user != null)
                 {
                     var cartItem = user.CartItems.Select(c => new OutCartDto
                     {
-                        Id = c.Id,
+                        Id = c.Product.Id,
                         ProductName = c.Product.Name,
                         Price = c.Product.NewPrice,
                         Quantity = c.Quantity,
@@ -99,11 +100,11 @@ namespace WebApplication7_petPals.Services.Cart
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<bool> RemoveCart(int product_id, string token)
+        public async Task<bool> RemoveCart(int product_id, int userId)
         {
             try
             {
-                var userId = _jwtIdInterface.GetUserFromToken(token);
+                //var userId = _jwtIdInterface.GetUserFromToken(token);
                 if (userId == 0) throw new Exception("invalid user");
                 var user = await _context.Users.Include(c => c.Cart).ThenInclude(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
                 if (user == null) throw new Exception("error of fething user");
@@ -132,12 +133,12 @@ namespace WebApplication7_petPals.Services.Cart
             }
 
         }
-        public async Task<bool> IncreaseQuantity(int product_id, string token)
+        public async Task<bool> IncreaseQuantity(int product_id, int userId)
         {
             try
             {
-                var user_id = _jwtIdInterface.GetUserFromToken(token);
-                var user = await _context.Users.Include(c => c.Cart).ThenInclude(p => p.CartItems).FirstOrDefaultAsync(c => c.UserId == user_id);
+                //var user_id = _jwtIdInterface.GetUserFromToken(token);
+                var user = await _context.Users.Include(c => c.Cart).ThenInclude(p => p.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
                 if (user == null) throw new Exception("canot find the user");
                 var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
                 if (product == null) throw new Exception(" invalid the product");
@@ -162,11 +163,11 @@ namespace WebApplication7_petPals.Services.Cart
             }
            
         }
-        public async Task<string> DecreaseQuantity(int product_id, string token)
+        public async Task<string> DecreaseQuantity(int product_id, int userId)
         {
             try
             {
-                var userId = _jwtIdInterface.GetUserFromToken(token);
+                //var userId = _jwtIdInterface.GetUserFromToken(token);
                 if (userId == null) throw new Exception("invalid token for the id");
                 var user = await _context.Users.Include(c => c.Cart).ThenInclude(p => p.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
                 var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);

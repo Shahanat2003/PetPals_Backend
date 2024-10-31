@@ -19,23 +19,23 @@ namespace WebApplication7_petPals.Services.Wishlist
             _jwtIdInterface = jwtIdInterface;
         }
 
-        public async Task<string> AddToWishlist(string token,int product_id)
+        public async Task<string> AddToWishlist(int userId, int product_id)
         {
             try
             {
-                var user_id=_jwtIdInterface.GetUserFromToken(token);
-                if (user_id == null) {
+                //var user_id=_jwtIdInterface.GetUserFromToken(token);
+                if (userId == null) {
                     return "invalid userId";
                 }
 
                 //var existingItem = await _context.wishlists.AnyAsync(c => c.User_id == user_id && c.Product_id == product_id);
-                var existingItem = await _context.wishlists.Include(w => w.Product).FirstOrDefaultAsync(p => p.User_id == user_id && p.Product_id == product_id);
+                var existingItem = await _context.wishlists.Include(w => w.Product).FirstOrDefaultAsync(p => p.User_id == userId && p.Product_id == product_id);
                 if (existingItem==null)
                 {
                     var WishlistDto = new WishlistDto()
                     {
                         Product_id = product_id,
-                        User_id = user_id
+                        User_id = userId
                     };
                     var newItem=_mapper.Map<Wishlists>(WishlistDto);
                     _context.wishlists.Add(newItem);
@@ -76,11 +76,11 @@ namespace WebApplication7_petPals.Services.Wishlist
             
 
        // }
-        public async Task<List<WhishlistOutDto>> GetWishList(string token)
+        public async Task<List<WhishlistOutDto>> GetWishList(int userId)
         {
             try
             {
-                var userId = _jwtIdInterface.GetUserFromToken(token);
+                //var userId = _jwtIdInterface.GetUserFromToken(token);
                 var wishlist = await _context.wishlists.Include(c => c.Product).ThenInclude(p => p.Category).Where(w => w.User_id == userId).ToListAsync();
                 if (wishlist.Count > 0)
                 {

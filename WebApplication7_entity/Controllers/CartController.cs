@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApplication7_petPals.Services.Cart;
 
 namespace WebApplication7_petPals.Controllers
@@ -22,41 +23,54 @@ namespace WebApplication7_petPals.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
                 // Check if token is missing or in an unexpected format
-                if (string.IsNullOrEmpty(token) || !token.StartsWith("Bearer "))
-                {
-                    Console.WriteLine("Received token: " + token); // Log to check the token
-                    return BadRequest("Authorization token is missing or invalid.");
-                }
+                //if (string.IsNullOrEmpty(token) || !token.StartsWith("Bearer "))
+                //{
+                //    Console.WriteLine("Received token: " + token); // Log to check the token
+                //    return BadRequest("Authorization token is missing or invalid.");
+                //}
 
-                var jwtToken = token.Split(' ')[1];
-                var result = await _cart.AddToCart(productId, jwtToken);
+                //var jwtToken = token?.Split(' ')[1];
+                var userid = GetingUserIdByClaims();
+                var result = await _cart.AddToCart(productId, userid);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized("unAuthorized or invalid token");
             }
         }
         [Authorize(Roles = "User")]
         [HttpGet]
         public async Task<IActionResult> GetCartItem()
         {
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            var splitToken = token?.Split(' ');
-            var jwtToken = splitToken?[1];
-            var result=await _cart.GetCartItem(jwtToken);
-            return Ok(result);
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //var splitToken = token?.Split(' ');
+            //var jwtToken = splitToken?[1];
+            try
+            {
+                var userid = GetingUserIdByClaims();
+                var result = await _cart.GetCartItem(userid);
+                return Ok(result);
+
+            }
+            catch(Exception ex)
+            {
+                return Unauthorized("unAuthorized");
+            }
+           
         }
+        [Authorize(Roles = "User")]
         [HttpDelete("id")]
         public async Task<IActionResult> RemoveCart(int productId)
         {
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            var jwtToken= token?.Split(' ')[1];
-            
-            var result=await _cart.RemoveCart(productId,jwtToken);
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //var jwtToken= token?.Split(' ')[1];
+
+            var userid = GetingUserIdByClaims();
+            var result=await _cart.RemoveCart(productId, userid);
             return Ok(result);
 
         }
@@ -64,19 +78,32 @@ namespace WebApplication7_petPals.Controllers
         [HttpPut("id:increseQuantity")]
         public async Task<IActionResult> IncreaseQunatity(int productId)
         {
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-                var jwtToken=token?.Split(' ')[1];
-            var result=await _cart.IncreaseQuantity(productId,jwtToken);
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //    var jwtToken=token?.Split(' ')[1];
+            var userid = GetingUserIdByClaims();
+            var result=await _cart.IncreaseQuantity(productId, userid);
             return Ok(result);
         }
         [Authorize(Roles = "User")]
         [HttpPut("id:Decrease:Quantity")]
         public async Task<IActionResult> DecreseQuantity(int productId)
         {
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            var jwtToken = token?.Split(' ')[1];
-            var result=await _cart.DecreaseQuantity(productId,jwtToken);
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //var jwtToken = token?.Split(' ')[1];
+            var userid = GetingUserIdByClaims();
+            var result=await _cart.DecreaseQuantity(productId, userid);
             return Ok(result);
+
+        }
+
+        private int GetingUserIdByClaims()
+        {
+            var ClaimOfId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(int.TryParse(ClaimOfId,out int user_id))
+            {
+                return user_id;
+            }
+            throw new Exception("Invalid User Id");
 
         }
     }

@@ -24,19 +24,20 @@ namespace WebApplication7_petPals.Services.Login
                
                
                     var us = await _context.Users.FirstOrDefaultAsync(x => x.Email == userDto.Email);
-                    if (us == null || !ValidatePassword(userDto.Password, us.Password))
+             
+                if (us == null || !ValidatePassword(userDto.Password, us.Password))
                     {
-                        throw new InvalidOperationException("Invalid email or password");
+                    return null;
 
                     }
                 if (us.blocked)
                 {
                     return "the user is blocked";
                 }
-                    
-                
-                    var token = CreateToken(us);
+
+                var token = CreateToken(us);
                     return token;
+                
                 
                
             }

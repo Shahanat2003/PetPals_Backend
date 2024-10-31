@@ -40,13 +40,13 @@ namespace WebApplication7_petPals
             modelBuilder.Entity<User>().Property(e => e.Role)
                 .HasDefaultValue("User");
 
-            //modelBuilder.Entity<User>()
-            //  .Property(e=>e.blocked)
-            //  .HasDefaultValue(false);
+            modelBuilder.Entity<User>()
+              .Property(e => e.blocked)
+              .HasDefaultValue(false);
 
 
 
-          modelBuilder.Entity<Category>()
+            modelBuilder.Entity<Category>()
                 .HasMany(c =>c. Products)
                 .WithOne(p => p.Category)
                 .HasForeignKey(c => c.CategoryId);

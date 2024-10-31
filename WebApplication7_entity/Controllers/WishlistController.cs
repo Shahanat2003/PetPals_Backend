@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using WebApplication7_petPals.Models;
 using WebApplication7_petPals.Services.Wishlist;
 
 namespace WebApplication7_petPals.Controllers
@@ -18,15 +20,16 @@ namespace WebApplication7_petPals.Controllers
         [HttpPost("addToWishlist")]
         public async Task<IActionResult> AddtoWishlist( int product_id)
         {
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            var jwtToken = token?.Split(' ')[1];
-            var itemExist = await _wishlists.AddToWishlist(jwtToken, product_id);
+            var userId = GetUserIdByClaims();
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //var jwtToken = token?.Split(' ')[1];
+            var itemExist = await _wishlists.AddToWishlist(userId, product_id);
            
             return Ok(itemExist);
         }
         //[HttpDelete("id")]
         //public async Task<IActionResult> RemoveWishlist(int product_id)
-        //{
+        //{ 
         //    var result=await _wishlists.RemoveFromWishlist(product_id);
         //    return Ok(result);
 
@@ -37,9 +40,10 @@ namespace WebApplication7_petPals.Controllers
         {
             try
             {
-                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-                var JwtToken=token?.Split(" ")[1];
-                var result = await _wishlists.GetWishList(JwtToken);
+                //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                //var JwtToken=token?.Split(" ")[1];
+                var userId = GetUserIdByClaims();
+                var result = await _wishlists.GetWishList(userId);
                 return Ok(result);
 
             }
@@ -49,6 +53,16 @@ namespace WebApplication7_petPals.Controllers
 
             }
             }
+
+        private int GetUserIdByClaims()
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(int.TryParse(userClaim,out int userId))
+            {
+                return userId;
+            }
+            throw new Exception("invalid user id");
+        }
 
     }
 }

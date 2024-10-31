@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApplication7_petPals;
 using WebApplication7_petPals.Mapping;
+using WebApplication7_petPals.Midlware;
 using WebApplication7_petPals.Services.Cart;
 using WebApplication7_petPals.Services.Catogory;
 using WebApplication7_petPals.Services.JWT_id;
@@ -71,6 +72,7 @@ namespace WebApplication7_entity
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseMiddleware<JwtMidlware>();
             app.UseStaticFiles();
 
             app.UseHttpsRedirection();

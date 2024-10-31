@@ -39,7 +39,7 @@ namespace WebApplication7_petPals.Controllers
             var result=await _catogryInterface.DeleteCatogory(id);
             return Ok(result);
         }
-        [Authorize]
+       
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {

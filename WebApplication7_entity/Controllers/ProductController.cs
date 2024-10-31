@@ -16,7 +16,7 @@ namespace WebApplication7_petPals.Controllers
         {
             _productInterface = productInterface;
         }
-        [Authorize]
+        
         [HttpGet("AllProduct")]
         public async Task<IActionResult> GetAll()
         {
@@ -37,19 +37,19 @@ namespace WebApplication7_petPals.Controllers
             var result=await _productInterface.UpdateProduct(id, prdctDto,image);
             return Ok(result);
         }
-        [Authorize(Roles = "Admin")]
+        
         [HttpGet("GetByProductId/{id}")]
         public async Task <IActionResult> GetById(int id)
         {
             var result=await _productInterface.GetProductById(id);
             return Ok(result);
         }
-        [Authorize]
+       
         [HttpGet("GetByCategoryName/{name}")]
         
-        public async Task<IActionResult> GetByName(string name)
+        public async Task<IActionResult> GetByName(string Catogory_name)
         {
-            var result=await _productInterface.GetProductByName(name);
+            var result=await _productInterface.GetProductByName(Catogory_name);
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]
@@ -58,6 +58,21 @@ namespace WebApplication7_petPals.Controllers
         {
             var result= await _productInterface.DeleteProduct(id);
             return Ok(result);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchItems(string search)
+        {
+            var result=await _productInterface.Searchproduct(search);
+            return Ok(result);
+
+        }
+        [HttpGet("pagination")]
+        public async Task<IActionResult> Pagination(int pageNo,int size)
+        {
+            var result = await _productInterface.Pagination(pageNo, size);
+            return Ok(result);
+
         }
     }
 }
