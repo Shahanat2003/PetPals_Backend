@@ -22,7 +22,7 @@ namespace WebApplication7_petPals.Controllers
                 var result=await _registerInterface.Register(userRegisterDto);
                 if(result== "the user already exist")
                 {
-                    return Conflict("item already exist");
+                    return Conflict("the user already exist");
                 }
                 return Ok(result);
             }

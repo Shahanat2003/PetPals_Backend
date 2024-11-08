@@ -38,7 +38,7 @@ namespace WebApplication7_petPals.Services.Products
                         NewPrice = p.NewPrice,
                         OldPrice = p.OldPrice,
                         Type = p.Type,
-                        Category = p.Category.Name,
+                        Category = p.CategoryId,
                         Img = HostUrl + p.Img
                     }).ToList();
                     return productCategory;
@@ -54,7 +54,7 @@ namespace WebApplication7_petPals.Services.Products
             }
 
         }
-        public async Task<bool> CreateProduct(CreatePrdctDto productDto, IFormFile image)
+        public async Task<string> CreateProduct(CreatePrdctDto productDto, IFormFile image)
         {
             try
             {
@@ -81,13 +81,14 @@ namespace WebApplication7_petPals.Services.Products
                 product.Img = ProductImage;
                 await _context.products.AddAsync(product);
                 await _context.SaveChangesAsync();
-                return true;
+                return "item added succesfuly";
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return false;
+
+
+                throw new Exception("error occcured when the product is added" + ex.Message);
             }
 
         }
@@ -95,6 +96,8 @@ namespace WebApplication7_petPals.Services.Products
         {
             try
             {
+                var categoryExists = await _context.catogories.AnyAsync(c => c.Id == prdctDto.CategoryId);
+              
                 var product = _context.products.FirstOrDefault(p => p.Id == id);
                 if (product != null)
                 {
@@ -131,6 +134,10 @@ namespace WebApplication7_petPals.Services.Products
 
 
             }
+            catch(DbUpdateException ex)
+            {
+                throw new Exception(ex?.InnerException?.Message);
+            }
             catch (Exception ex)
             {
 
@@ -149,7 +156,8 @@ namespace WebApplication7_petPals.Services.Products
                     Type = p.Type,
                     NewPrice = p.NewPrice,
                     OldPrice = p.OldPrice,
-                    Category = p.Category.Name
+                    Img=HostUrl+p.Img,
+                    Category = p.CategoryId
                 }).ToListAsync();
                 return prodct;
 
@@ -176,7 +184,8 @@ namespace WebApplication7_petPals.Services.Products
                     Type = p.Type,
                     NewPrice = p.NewPrice,
                     OldPrice = p.OldPrice,
-                    Category = p.Category.Name
+                    Img=HostUrl+p.Img,
+                    Category = p.CategoryId
                 }).ToListAsync();
                 return prodct;
             }
@@ -217,11 +226,14 @@ namespace WebApplication7_petPals.Services.Products
                     return searchedProduct.Select(p => new OutPrdctDto
                     {
                         Id = p.Id,
+                        Img=HostUrl+p.Img,
+                        
                         Name = p.Name,
                         NewPrice = p.NewPrice,
                         OldPrice = p.OldPrice,
                         Description = p.Description,
-                        Category = p.Category.Name,
+                        Category = p.CategoryId,
+                        
                         Type = p.Type
                     }).ToList();
 
@@ -250,7 +262,7 @@ namespace WebApplication7_petPals.Services.Products
                         Name = p.Name,
                         OldPrice = p.OldPrice,
                         Description = p.Description,
-                        Category = p.Category.Name,
+                        Category = p.CategoryId,
                         NewPrice = p.NewPrice
 
                     }).ToList();

@@ -12,11 +12,14 @@ namespace WebApplication7_petPals.Services.Wishlist
     {
         private readonly AppDbContext _context;
         private readonly IJwtIdInterface _jwtIdInterface;
+        private readonly IConfiguration configuration;
         private readonly IMapper _mapper;
-        public WishlistService(AppDbContext appDbContext,IMapper mapper,IJwtIdInterface jwtIdInterface) { 
+        private string _hostUrl;
+        public WishlistService(AppDbContext appDbContext,IMapper mapper,IJwtIdInterface jwtIdInterface,IConfiguration configuration) { 
         _context = appDbContext;
             _mapper = mapper;
             _jwtIdInterface = jwtIdInterface;
+           _hostUrl= configuration["HostUrl:url"];
         }
 
         public async Task<string> AddToWishlist(int userId, int product_id)
@@ -91,7 +94,7 @@ namespace WebApplication7_petPals.Services.Wishlist
                         price = p.Product.NewPrice,
                         Product_Description = p.Product.Description,
                         Catogory = p.Product.Category.Name,
-                        Image = p.Product.Img
+                        Image = _hostUrl+p.Product.Img
                     }).ToList();
 
                 }

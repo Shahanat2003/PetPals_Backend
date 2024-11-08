@@ -43,6 +43,24 @@ namespace WebApplication7_petPals.Services.Users
             }
 
         }
+        public async Task<OutputUserDto> GetUserById(int user_id)
+        {
+            try
+            {
+                var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.UserId == user_id);
+                if (user == null)
+                {
+                    throw new Exception("invalid user");
+                }
+               return   _mapper.Map<OutputUserDto>(user);
+              
+
+            }catch(Exception ex)
+            {
+                throw new Exception("error occured fetching user" + ex.Message);
+
+            }
+        }
 
 
 

@@ -9,6 +9,7 @@
         public string Type { get;set; }
         public int OldPrice { get; set; }
         public int NewPrice { get; set; }
-        public string Category { get; set; }
+        public int Category { get; set; }
+     
     }
 }

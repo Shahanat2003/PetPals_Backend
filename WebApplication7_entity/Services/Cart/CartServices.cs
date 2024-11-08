@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using WebApplication7_petPals.Models;
 using WebApplication7_petPals.Models.CartDto;
 using WebApplication7_petPals.Services.JWT_id;
@@ -19,7 +20,7 @@ namespace WebApplication7_petPals.Services.Cart
             _configuration = configuration;
             _hostURL = _configuration["HostUrl:url"];
         }
-        public async Task<bool> AddToCart(int product_id, int userId)
+        public async Task<string> AddToCart(int product_id, int userId)
         {
             try
             {
@@ -49,7 +50,8 @@ namespace WebApplication7_petPals.Services.Cart
                 CartItem existingProduct = user.Cart.CartItems.FirstOrDefault(c => c.Product_id == product_id);
                 if (existingProduct != null)
                 {
-                    existingProduct.Quantity++;
+                    existingProduct.Quantity=existingProduct.Quantity;
+                    return ("item already in the cart");
                 }
                 else
                 {
@@ -62,13 +64,13 @@ namespace WebApplication7_petPals.Services.Cart
                     _context.cartItems.Add(cartItem);
                 }
                 await _context.SaveChangesAsync();
-                return true;
+                return ("item added succesfuly");
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
+                return ("error occure adding cart Item");
             }
 
         }
@@ -80,6 +82,10 @@ namespace WebApplication7_petPals.Services.Cart
                 if (userId == 0) throw new Exception("the user is invalid");
                 var user = await _context.carts.Include(p => p.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(po => po.User_id == userId);
                 if (user == null) throw new Exception("no user found");
+                if (user.CartItems == null)
+                {
+                    throw new Exception("items not in cart");
+                }
                 if (user != null)
                 {
                     var cartItem = user.CartItems.Select(c => new OutCartDto
@@ -133,63 +139,101 @@ namespace WebApplication7_petPals.Services.Cart
             }
 
         }
-        public async Task<bool> IncreaseQuantity(int product_id, int userId)
+        public async Task<string> IncreaseQuantity(int product_id, int userId)
         {
             try
             {
-                //var user_id = _jwtIdInterface.GetUserFromToken(token);
-                var user = await _context.Users.Include(c => c.Cart).ThenInclude(p => p.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
-                if (user == null) throw new Exception("canot find the user");
-                var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
-                if (product == null) throw new Exception(" invalid the product");
-                if (user != null && product != null)
+                var user = await _context.Users
+                    .Include(c => c.Cart)
+                    .ThenInclude(p => p.CartItems)
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (user == null)
                 {
-                    var item = user.Cart.CartItems.FirstOrDefault(p => p.Product_id == product_id);
-                    if (item != null)
+                    throw new Exception("Cannot find the user");
+                }
+
+                var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
+
+                if (product == null)
+                {
+                    throw new Exception("Invalid product");
+                }
+
+                var item = user.Cart.CartItems.FirstOrDefault(p => p.Product_id == product_id);
+
+                if (item != null)
+                {
+                    if (item.Quantity < 10)
                     {
                         item.Quantity++;
                         await _context.SaveChangesAsync();
-                        return true;
+                        return "Quantity increased successfully";
                     }
-                    return false;
-
+                    else
+                    {
+                        return "Maximum quantity limit reached";
+                    }
                 }
-                return false;
 
+                throw new Exception("Item not found in cart");
             }
-            catch (Exception ex) {
-                return false;
-                throw new Exception("error when increase the quantity");
+            catch (Exception)
+            {
+                throw new Exception("Error when increasing the quantity");
             }
-           
         }
+
         public async Task<string> DecreaseQuantity(int product_id, int userId)
         {
             try
             {
                 //var userId = _jwtIdInterface.GetUserFromToken(token);
-                if (userId == null) throw new Exception("invalid token for the id");
-                var user = await _context.Users.Include(c => c.Cart).ThenInclude(p => p.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
-                var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
-                if (product == null) throw new Exception("invalid product id");
-                if (user != null && product != null)
+                if (userId == null)
                 {
-                    var item = user.Cart.CartItems.FirstOrDefault(p => p.Product_id == product_id);
-                    if (item != null)
+                    throw new Exception("Invalid token for the ID");
+                }
+
+                var user = await _context.Users
+                    .Include(c => c.Cart)
+                    .ThenInclude(p => p.CartItems)
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (user == null)
+                {
+                    throw new Exception("Cannot find the user");
+                }
+
+                var product = await _context.products.FirstOrDefaultAsync(p => p.Id == product_id);
+
+                if (product == null)
+                {
+                    throw new Exception("Invalid product ID");
+                }
+
+                var item = user.Cart.CartItems.FirstOrDefault(p => p.Product_id == product_id);
+
+                if (item != null)
+                {
+                    if (item.Quantity > 1)
                     {
                         item.Quantity--;
                         await _context.SaveChangesAsync();
-                        return "quantity is decreased";
+                        return "Quantity decreased successfully";
                     }
-                    return "the item is not found in the user";
+                    else
+                    {
+                        return "Quantity cannot be less than 1";
+                    }
                 }
-                return "error of fetching product and user";
 
+                return "Item not found in the user's cart";
             }
-            catch (Exception ex) { 
-            return ex.Message;
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
-          
         }
+
     }
 }

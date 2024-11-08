@@ -8,5 +8,6 @@ namespace WebApplication7_petPals.Services.Users
     {
         Task<List<OutputUserDto>> GetUser();
         Task<string> UserBlockedAndUnblocked(int user_id);
+        Task<OutputUserDto> GetUserById(int user_id);
     }
 }

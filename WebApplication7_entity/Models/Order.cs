@@ -11,8 +11,8 @@
         public string Customer_address { get; set; }
         public string Customer_city { get; set; }
         public string Order_string { get; set; }
-        public int Transaction_id { get; set; }
-        public string Order_id { get; set; }
+        public string Transaction_id { get; set; }
+        //public string Order_id { get; set; }
 
         public virtual User User { get; set; }
         public virtual List<OrderItem> OrderItems { get; set; }

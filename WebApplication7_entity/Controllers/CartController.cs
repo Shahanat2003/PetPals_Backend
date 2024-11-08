@@ -1,7 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Razorpay.Api;
+using System.Net;
 using System.Security.Claims;
+using WebApplication7_petPals.ApiStatusCode;
+using WebApplication7_petPals.Models.CartDto;
+using WebApplication7_petPals.Models.Dto.UserDto;
 using WebApplication7_petPals.Services.Cart;
 
 namespace WebApplication7_petPals.Controllers
@@ -34,8 +39,17 @@ namespace WebApplication7_petPals.Controllers
 
                 //var jwtToken = token?.Split(' ')[1];
                 var userid = GetingUserIdByClaims();
+                
                 var result = await _cart.AddToCart(productId, userid);
-                return Ok(result);
+                if(result== "item already in the cart")
+                {
+                    var res = new ApiResponse<string>(HttpStatusCode.Conflict, false, "Item already in the cart", null);
+                    return Conflict(res);
+                }
+                var response = new ApiResponse<string>(HttpStatusCode.OK, true, "item added to cart", result);
+                return Ok(response);
+
+               
             }
             catch (Exception ex)
             {
@@ -52,13 +66,15 @@ namespace WebApplication7_petPals.Controllers
             try
             {
                 var userid = GetingUserIdByClaims();
-                var result = await _cart.GetCartItem(userid);
-                return Ok(result);
+                var response = await _cart.GetCartItem(userid);
+
+
+                return Ok(response);
 
             }
             catch(Exception ex)
             {
-                return Unauthorized("unAuthorized");
+                return BadRequest(ex.Message);
             }
            
         }
@@ -70,28 +86,31 @@ namespace WebApplication7_petPals.Controllers
             //var jwtToken= token?.Split(' ')[1];
 
             var userid = GetingUserIdByClaims();
-            var result=await _cart.RemoveCart(productId, userid);
+            var response=await _cart.RemoveCart(productId, userid);
+            var result = new ApiResponse<bool>(HttpStatusCode.OK, true,"item removed", response);
             return Ok(result);
 
         }
         [Authorize(Roles = "User")]
-        [HttpPut("id:increseQuantity")]
-        public async Task<IActionResult> IncreaseQunatity(int productId)
+        [HttpPut("IncreaseQuantity")]
+        public async Task<IActionResult> IncreaseQuantity(int productId)
         {
-            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            //    var jwtToken=token?.Split(' ')[1];
             var userid = GetingUserIdByClaims();
-            var result=await _cart.IncreaseQuantity(productId, userid);
+            var respons = await _cart.IncreaseQuantity(productId, userid);
+            var result = new ApiResponse<string>(HttpStatusCode.OK, true, "qunatityIncresed", respons);
             return Ok(result);
         }
+
+
         [Authorize(Roles = "User")]
-        [HttpPut("id:Decrease:Quantity")]
+        [HttpPut("DecreaseQuantity")]
         public async Task<IActionResult> DecreseQuantity(int productId)
         {
             //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             //var jwtToken = token?.Split(' ')[1];
             var userid = GetingUserIdByClaims();
-            var result=await _cart.DecreaseQuantity(productId, userid);
+            var response=await _cart.DecreaseQuantity(productId, userid);
+            var result = new ApiResponse<string>(HttpStatusCode.OK, true, "quantityDecresed", response);
             return Ok(result);
 
         }

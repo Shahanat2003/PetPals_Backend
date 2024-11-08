@@ -8,7 +8,7 @@
         public decimal totalPrice  { get; set; }
         public DateTime orderDate { get; set; }
         public string image {  get; set; }
-        public string order_id { get; set; }
-        public string order_status { get; set; }
+        public string order_string { get; set; }
+       
     }
 }

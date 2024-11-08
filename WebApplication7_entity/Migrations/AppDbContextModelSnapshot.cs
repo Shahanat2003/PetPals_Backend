@@ -115,16 +115,13 @@ namespace WebApplication7_petPals.Migrations
                     b.Property<DateTime>("Order_date")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Order_id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Order_string")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Transaction_id")
-                        .HasColumnType("int");
+                    b.Property<string>("Transaction_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("User_id")
                         .HasColumnType("int");
@@ -231,7 +228,9 @@ namespace WebApplication7_petPals.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("blocked")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.HasKey("UserId");
 

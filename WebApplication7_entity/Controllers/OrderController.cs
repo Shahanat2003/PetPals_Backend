@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using WebApplication7_petPals.ApiStatusCode;
 using WebApplication7_petPals.Models.Dto.OrderDto;
 using WebApplication7_petPals.Services.Orders;
 
@@ -16,42 +20,61 @@ namespace WebApplication7_petPals.Controllers
         }
 
         [HttpPost("createOrder")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder(OrderRequestDto orderRequestDto)
 
         {
-            if (orderRequestDto == null)
-            {
-                return BadRequest();
-            }
-            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            var jwtToken = token?.Split(' ')[1];
+            
+            //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            //var jwtToken = token?.Split(' ')[1];
 
-            if (orderRequestDto == null || jwtToken == null)
-            {
-                return BadRequest();
+            //if (orderRequestDto == null || jwtToken == null)
+            //{
+            //    return BadRequest();
 
+            //}
+            try
+            {
+                if (orderRequestDto == null)
+                {
+                    return BadRequest();
+                }
+                var userId = GetUseid();
+                var response = await _orderInterface.RazorPaycreate(userId, orderRequestDto);
+                return Ok(response);
             }
-            var result = await _orderInterface.RazorPaycreate(token, orderRequestDto);
-            return Ok(result);
+            catch (Exception ex) { 
+            return BadRequest(ex.Message);
+            }
+           
         }
-        [HttpPost("RazorPayment")]
-        public async Task<IActionResult> RazorPayment(long price)
+        [HttpPost("RazorIdCreate")]
+        [Authorize]
+        public async Task<IActionResult> RazorOrderIdCreate(long price)
         {
-            if (price <= 0 || price > 100000)
+            try
             {
-                return BadRequest("enter valid amount");
+                if (price <= 0 || price > 100000)
+                {
+                    return BadRequest("enter valid amount");
+                }
+                var response = await _orderInterface.RazorOrderIdCreate(price);
+                return Ok(response);
             }
-            var result = await _orderInterface.RazorPayPayment(price);
-            return Ok(result);
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+           
 
         }
         [HttpGet("GetOrders")]
+        [Authorize]
         public async Task<IActionResult> GetOrders(int userId)
         {
             try
             {
-                var result = await _orderInterface.GetOrders(userId);
-                return Ok(result);
+                var response = await _orderInterface.GetOrders(userId);
+                return Ok(response);
 
             }
             catch (Exception ex)
@@ -60,15 +83,64 @@ namespace WebApplication7_petPals.Controllers
             }
         }
         [HttpPost]
-        public IActionResult paymnet(RazorPayDto razorPayDto)
+        [Authorize]
+        public  IActionResult Paymnet(RazorPayDto razorPayDto)
         {
-            if (razorPayDto == null)
+            try
             {
-                return BadRequest("razor pay details is null");
+                if (razorPayDto == null)
+                {
+                    return BadRequest("razor pay details is null");
+                }
+                var response = _orderInterface.payment(razorPayDto);
+                return Ok(response);
+
             }
-            var result = _orderInterface.payment(razorPayDto);
-            return Ok(result);
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+           
         }
+
+        [HttpGet("AdminView")]
+        public async Task<IActionResult> OrderAdminView()
+        {
+            try
+            {
+                var result =await _orderInterface.OrderAdminView();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+        }
+
+        [HttpGet("totalRevenue")]
+        public async Task<IActionResult> TotalRevenue()
+        {
+            try
+            {
+                var result = await _orderInterface.TotalRevenue();
+                return Ok(result);
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        private int GetUseid()
+        {
+            var userIdString=User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(int.TryParse(userIdString,out int userId))
+            {
+                return userId;
+            }
+            throw new Exception("invalid user");
+        }
+
+      
     }
 }
 

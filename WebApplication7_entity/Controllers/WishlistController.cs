@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Security.Claims;
+using WebApplication7_petPals.ApiStatusCode;
 using WebApplication7_petPals.Models;
+using WebApplication7_petPals.Models.Dto.WishlistDto;
 using WebApplication7_petPals.Services.Wishlist;
 
 namespace WebApplication7_petPals.Controllers
@@ -23,9 +26,12 @@ namespace WebApplication7_petPals.Controllers
             var userId = GetUserIdByClaims();
             //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             //var jwtToken = token?.Split(' ')[1];
-            var itemExist = await _wishlists.AddToWishlist(userId, product_id);
+            var itemExist = await  _wishlists.AddToWishlist(userId, product_id);
+            var result =new ApiResponse<string>(HttpStatusCode.OK, true, "wishlist", itemExist);
+
+
            
-            return Ok(itemExist);
+            return Ok(result);
         }
         //[HttpDelete("id")]
         //public async Task<IActionResult> RemoveWishlist(int product_id)
@@ -43,8 +49,10 @@ namespace WebApplication7_petPals.Controllers
                 //var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
                 //var JwtToken=token?.Split(" ")[1];
                 var userId = GetUserIdByClaims();
+
                 var result = await _wishlists.GetWishList(userId);
-                return Ok(result);
+                var response = new ApiResponse<List<WhishlistOutDto>>(HttpStatusCode.OK, true, "wishlist", result);
+                return Ok(response);
 
             }
             catch (Exception ex)

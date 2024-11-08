@@ -46,6 +46,17 @@ namespace WebApplication7_entity
 
 
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
+
+
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,6 +76,7 @@ namespace WebApplication7_entity
 
 
             var app = builder.Build();
+            app.UseCors("AllowAllOrigins");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())    

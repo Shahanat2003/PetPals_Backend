@@ -4,6 +4,6 @@ namespace WebApplication7_petPals.Services.Login
 {
     public interface ILoginInterface
     {
-        Task<string> Login(UserLoginDto userLoginDto);
+        Task <LoginResponseDto> Login(UserLoginDto userLoginDto);
     }
 }

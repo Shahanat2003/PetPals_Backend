@@ -18,7 +18,7 @@ namespace WebApplication7_petPals.Services.Login
 
         }
 
-        public async Task<string> Login(UserLoginDto userDto) {
+        public async Task<LoginResponseDto> Login(UserLoginDto userDto) {
             try
             {
                
@@ -27,16 +27,22 @@ namespace WebApplication7_petPals.Services.Login
              
                 if (us == null || !ValidatePassword(userDto.Password, us.Password))
                     {
-                    return null;
+                    throw new Exception("invalid user");
 
                     }
-                if (us.blocked)
+                else if (us.blocked)
                 {
-                    return "the user is blocked";
+                    throw new Exception("the user is bloked");
                 }
 
                 var token = CreateToken(us);
-                    return token;
+                return new LoginResponseDto
+                {
+                    Id=us.UserId,
+                    Role = us.Role,
+                    UserName = us.UserName,
+                    Token = token
+                };
                 
                 
                
@@ -44,7 +50,7 @@ namespace WebApplication7_petPals.Services.Login
            
             catch (Exception ex)
             {
-                return ex.Message;
+                throw new Exception(ex.Message);
 
             }
         }
