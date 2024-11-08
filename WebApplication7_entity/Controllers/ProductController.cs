@@ -111,7 +111,8 @@ namespace WebApplication7_petPals.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var result= await _productInterface.DeleteProduct(id);
-            return Ok(result);
+            var response = new ApiResponse<bool>(HttpStatusCode.OK, true, "productRemoved", result);
+            return Ok(response);
         }
 
         [HttpGet("search")]
